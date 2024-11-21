@@ -42,5 +42,5 @@ python main.py --task=classification_evaluation --job=generation_test --task_dat
 
 ## Inference
 ```bash
-python main.py --task=inference --job=inference --question="What are the benefits of AI in healthcare?" --classifier_model="t5-small" --llm_model="llama2_chat"
+python main.py --task inference --job inference --question "What are the benefits of AI in healthcare?" --model_type "t5-small" --llm_model "llama2_chat"
 ```
