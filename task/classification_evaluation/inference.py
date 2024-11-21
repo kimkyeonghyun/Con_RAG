@@ -7,9 +7,9 @@ from utils.utils import TqdmLoggingHandler, write_log, get_huggingface_model_nam
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
-# # Embeddings 설정
-# embeddings = Embeddings(path='intfloat/e5-base')
-# embeddings.load(provider="huggingface-hub", container="neuml/txtai-wikipedia")
+# Embeddings 설정
+embeddings = Embeddings(path='intfloat/e5-base')
+embeddings.load(provider="huggingface-hub", container="neuml/txtai-wikipedia")
 
 
 def classifier_model(args):
