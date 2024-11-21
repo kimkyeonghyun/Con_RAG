@@ -38,3 +38,9 @@ python main.py --task=classification_training --job=testing --task_dataset=${DAT
 ## 3. Generation Testing
 ```bash
 python main.py --task=classification_evaluation --job=generation_test --task_dataset=${DATASET} --model_type=${MODEL} --batch_size=${BS} --learning_rate=${LR} --num_epochs=${EP} --device=${DEVICE} --llm_model=${LLM}
+```
+
+## Inference
+```bash
+python main.py --task=inference --job=inference --question="What are the benefits of AI in healthcare?" --classifier_model="t5-small" --llm_model="meta-llama/Llama-2-7b-chat-hf"
+```

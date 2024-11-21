@@ -13,10 +13,10 @@ class ArgParser():
         self.proj_name = 'Text_classification'
 
         #Task arguments
-        task_list = ['data_preprocessing', 'classification_training', 'classification_evaluation']
+        task_list = ['data_preprocessing', 'classification_training', 'classification_evaluation', 'inference']
         self.parser.add_argument('--task', type = str, choices = task_list, default = 'classification',
                                  help = 'Task to do; Must be given.')
-        job_list = ['preprocessing', 'retriever', 'training', 'resume_training', 'testing', 'question_classification', 'generation_test']
+        job_list = ['preprocessing', 'retriever', 'training', 'resume_training', 'testing', 'question_classification', 'generation_test', 'inference']
         self.parser.add_argument('--job', type = str, choices = job_list, default = 'training',
                                  help = 'Job to do: Must be given.')
         dataset_list = ['triviaqa', 'naturalqa', 'squad']
@@ -64,7 +64,6 @@ class ArgParser():
         self.parser.add_argument('--num_transformer_layers', type=int, default=6,
                                  help='Num transformer layers; Default is 4')
         
-        # Model - Size arguments
         # Model - Optimizer & Scheduler arguments
         optim_list = ['SGD', 'AdaDelta', 'Adam', 'AdamW']
         scheduler_list = ['None', 'StepLR', 'LambdaLR', 'CosineAnnealingLR', 'ConsineAnnealingWarmRestars', 'ReduceLROnPlateau']
@@ -114,6 +113,9 @@ class ArgParser():
         self.parser.add_argument('--log_freq', default = 500, type = int,
                                  help = 'Logging frequency; Default is 500')
 
+        # Inference question
+        self.parser.add_argument('--question', type = str, default = 'What is the capital of France?',
+                                 help = 'Question to ask the model; Default is "What is the capital of France?"')
     def get_args(self):
         return self.parser.parse_args()
 
