@@ -1,8 +1,9 @@
 import os
 import torch
+import logging
 from txtai.embeddings import Embeddings
 from transformers import AutoTokenizer, T5ForSequenceClassification, T5Config, AutoModelForCausalLM
-
+from utils.utils import TqdmLoggingHandler, write_log, get_huggingface_model_name, get_torch_device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
@@ -11,13 +12,35 @@ embeddings = Embeddings(path='intfloat/e5-base')
 embeddings.load(provider="huggingface-hub", container="neuml/txtai-wikipedia")
 
 
-def create_classifier(model_name):
+def classifier_model(args: argparse.Namespace):
+    device = get_torch_device(args.device)
+
+    logger = logging.getLogger(__name__)
+    if logger.handlers:
+        logger.handlers.clear()
+    logger.setLevel(logging.DEBUG)
+    handler = TqdmLoggingHandler()
+    handler.setFormatter(logging.Formatter(" %(asctime)s - %(message)s", "%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(handler)
+
+    write_log(logger, 'Building model')
+    model_name = get_huggingface_model_name(args.model_type)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     config = T5Config.from_pretrained(model_name)
     config.num_labels = 1
     classifier = T5ForSequenceClassification.from_pretrained(model_name, config=config)
-    classifier.to(device)
-    classifier.eval()
+
+    load_model_name = os.path.join(args.model_path, args.task, args.task_dataset, args.model_type, 'final_model.pt')
+    write_log(logger, "Loading model weights")
+    checkpoint = torch.load(load_model_name, map_location=torch.device('cpu'))
+
+    for key in list(checkpoint['model'].keys()):
+        if 'model.' in key:
+            checkpoint['model'][key.replace('model.', '')] = checkpoint['model'].pop(key)
+
+    classifier.load_state_dict(checkpoint['model'])
+    classifier = classifier.to(device)
+    write_log(logger, f'Loaded model weights from {load_model_name}')
     return classifier, tokenizer
 
 
@@ -54,8 +77,8 @@ def inference(args):
     print(f"Starting inference for question: {args.question}")
 
     # Classifier
-    classifier_name = args.classifier_model
-    classifier, classifier_tokenizer = create_classifier(classifier_name)
+    classifier_name = args.model_type
+    classifier, classifier_tokenizer = classifier_model(classifier_name)
     is_relevant = classify_question(classifier, classifier_tokenizer, args.question)
 
     if not is_relevant:

@@ -86,13 +86,22 @@ def generate_answer(model, tokenizer, question, doc=None, is_retrieved=False):
     return answer.split('Answer:')[1] if 'Answer:' in answer else 'No answer found'
 
 
-def evaluate_model(args, data, model, tokenizer):
+def evaluate_model(args, data, model, tokenizer, classifier, classifier_tokenizer):
     pred_ans = []
     for question in tqdm(data):
         my_question = question["question"]
         ans = question["answer"]
-        document = ''.join(question["sparse_retrieval"][0])
-        is_retrieved = len(document) > 0
+
+        # Classify the question using the classifier
+        inputs = classifier_tokenizer(my_question, return_tensors="pt", padding=True, truncation=True).to(device)
+        outputs = classifier(**inputs)
+        logits = outputs.logits.squeeze().detach().cpu().item()
+        is_retrieved = logits > 0.5  # Set threshold for binary classification (1 = retrieve, 0 = no retrieve)
+
+        if is_retrieved:
+            document = ''.join(question["sparse_retrieval"][0])
+        else:
+            document = None  # No retrieval if not relevant
 
         predicted_answer = generate_answer(model, tokenizer, my_question, doc=document, is_retrieved=is_retrieved)
 
@@ -110,17 +119,24 @@ def classifier_llm_generation(args):
     with open(data_path, 'r') as data_file:
         data = json.load(data_file)
 
-    model_name = "meta-llama/Llama-2-7b-chat-hf"
+    # Load LLM model and tokenizer
+    model_name = get_huggingface_model_name(args.llm_model)
     bnb_config = create_bnb_config()
     model, tokenizer = load_model(model_name, bnb_config)
     model.eval()
 
-    pred_ans = evaluate_model(args, data, model, tokenizer)
+    # Load classifier model and tokenizer
+    classifier, classifier_tokenizer = classifier_model(args)
 
+    # Evaluate the model
+    pred_ans = evaluate_model(args, data, model, tokenizer, classifier, classifier_tokenizer)
+
+    # Calculate F1 score and accuracy
     f1 = f1_cal(args, pred_ans)
     all_accuracy = gold_answer(args, pred_ans)
     print(f"F1 Score: {f1}, All Accuracy: {all_accuracy}")
 
+    # Save results
     data[0]['f1_score'] = [f1]
     data[0]['all_accuracy'] = [all_accuracy]
 
