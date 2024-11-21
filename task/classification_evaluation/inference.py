@@ -57,6 +57,7 @@ def information_retrieval(query):
 
 
 def load_llm(model_name):
+    
     model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
@@ -100,7 +101,7 @@ def inference(args):
     print(f"Retrieved Documents: {retrieved_docs}")
 
     # LLM Inference
-    llm_name = args.llm_model
+    llm_name = get_huggingface_model_name(args.llm_model)
     llm_model, llm_tokenizer = load_llm(llm_name)
     answer = generate_answer(llm_model, llm_tokenizer, args.question, doc=combined_docs)
 
