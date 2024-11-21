@@ -60,11 +60,19 @@ def inference(args):
 
     if not is_relevant:
         print("Classification Result: Not relevant")
+        print("Skipping retrieval and proceeding with LLM only.")
+
+        # LLM Inference without retrieval
+        llm_name = args.llm_model
+        llm_model, llm_tokenizer = load_llm(llm_name)
+        answer = generate_answer(llm_model, llm_tokenizer, args.question)
+
+        print(f"Generated Answer: {answer}")
         return
 
     print("Classification Result: Relevant")
 
-    # Retrieval
+    # Retrieval (is_relevant이 True일 때만 실행)
     retrieved_docs = information_retrieval(args.question)
     combined_docs = " ".join(retrieved_docs) if retrieved_docs else None
     print(f"Retrieved Documents: {retrieved_docs}")
