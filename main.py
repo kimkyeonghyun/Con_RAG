@@ -40,7 +40,7 @@ def main(args: argparse.Namespace) -> None:
                 raise ValueError(f'Invalid job: {args.job}')
         elif args.task == 'inference':  # Inference task 추가
             if args.job == 'inference':
-                from task.inference.inference import inference as job  # inference.py의 job 함수 호출
+                from task.classification_evaluation.inference import inference as job  # inference.py의 job 함수 호출
             else:
                 raise ValueError(f'Invalid job: {args.job}')
         else:

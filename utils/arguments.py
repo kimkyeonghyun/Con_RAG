@@ -102,7 +102,7 @@ class ArgParser():
                                  help = 'Batch size for test; Default is 16')
         
         # Other arguments - Device, Seed, Logging, etc.
-        self.parser.add_argument('--device', type = str, default = 'cuda:2',
+        self.parser.add_argument('--device', type = str, default = 'cuda',
                                  help = 'Device to use for training; Default is cuda')
         self.parser.add_argument('--seed', type = int, default = 2023,
                                  help = 'Random sedd; Default is 2023')

@@ -7,12 +7,12 @@ from utils.utils import TqdmLoggingHandler, write_log, get_huggingface_model_nam
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
-# Embeddings 설정
-embeddings = Embeddings(path='intfloat/e5-base')
-embeddings.load(provider="huggingface-hub", container="neuml/txtai-wikipedia")
+# # Embeddings 설정
+# embeddings = Embeddings(path='intfloat/e5-base')
+# embeddings.load(provider="huggingface-hub", container="neuml/txtai-wikipedia")
 
 
-def classifier_model(args: argparse.Namespace):
+def classifier_model(args):
     device = get_torch_device(args.device)
 
     logger = logging.getLogger(__name__)
@@ -77,8 +77,7 @@ def inference(args):
     print(f"Starting inference for question: {args.question}")
 
     # Classifier
-    classifier_name = args.model_type
-    classifier, classifier_tokenizer = classifier_model(classifier_name)
+    classifier, classifier_tokenizer = classifier_model(args)
     is_relevant = classify_question(classifier, classifier_tokenizer, args.question)
 
     if not is_relevant:
